@@ -88,7 +88,7 @@ class Othello:
                         with open(data_root / f'gen10e5_{t_start}.pickle', 'wb') as handle:
                             pickle.dump(self.sequences, handle, protocol=pickle.HIGHEST_PROTOCOL)
                 else:
-                    bar = tqdm(os.listdir(f"./data/{wanna_use}"))
+                    bar = tqdm(data_root.iterdir())
                     trash = []
                     cnt = 0 
                     for f in bar:
