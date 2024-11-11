@@ -92,7 +92,7 @@ class Othello:
                     trash = []
                     cnt = 0 
                     for f in bar:
-                        if not f.endswith(".pickle"):
+                        if not str(f).endswith(".pickle"):
                             continue
                         with open(data_root / f, 'rb') as handle:
                             cnt += 1
