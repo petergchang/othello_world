@@ -72,7 +72,7 @@ class Othello:
         self.results = []
         self.board_size = 8 * 8
         criteria = lambda fn: fn.endswith("pgn") if wthor else fn.startswith("liveothello")
-        if "synthetic" in data_root:
+        if "synthetic" in str(data_root):
             if ood_num == 0:
                 return
             else:
@@ -116,7 +116,7 @@ class Othello:
                     self.val = self.sequences[20000000:]
                     self.sequences = self.sequences[:20000000]
                     print(f"Using 20 million for training, {len(self.val)} for validation")
-        elif "championship" in data_root:
+        elif "championship" in str(data_root):
             for fn in os.listdir(data_root):
                 if criteria(fn):
                     with open(os.path.join(data_root, fn), "r") as f:
