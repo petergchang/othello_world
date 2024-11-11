@@ -66,12 +66,13 @@ class Othello:
         # with a generated legit but stupid game, when data_root is None, should set to 0
         # data_root: if provided, will load pgn files there, else load from data/gen10e5
         # ood_num: how many simulated games to use, if -1, load 200 * 1e5 games = 20 million
+        assert data_root is not None
         self.ood_perc = ood_perc
         self.sequences = []
         self.results = []
         self.board_size = 8 * 8
         criteria = lambda fn: fn.endswith("pgn") if wthor else fn.startswith("liveothello")
-        if data_root is None:
+        if "synthetic" in data_root:
             if ood_num == 0:
                 return
             else:
@@ -84,7 +85,7 @@ class Othello:
                     p.close()
                     t_start = time.strftime("_%Y%m%d_%H%M%S")
                     if ood_num > 1000:
-                        with open(f'./data/{wanna_use}/gen10e5_{t_start}.pickle', 'wb') as handle:
+                        with open(data_root / f'gen10e5_{t_start}.pickle', 'wb') as handle:
                             pickle.dump(self.sequences, handle, protocol=pickle.HIGHEST_PROTOCOL)
                 else:
                     bar = tqdm(os.listdir(f"./data/{wanna_use}"))
@@ -93,7 +94,7 @@ class Othello:
                     for f in bar:
                         if not f.endswith(".pickle"):
                             continue
-                        with open(os.path.join(f"./data/{wanna_use}", f), 'rb') as handle:
+                        with open(data_root / f, 'rb') as handle:
                             cnt += 1
                             if cnt > 250:
                                 break
@@ -110,12 +111,12 @@ class Othello:
                     seq.sort()
                     self.sequences = [k for k, _ in itertools.groupby(seq)]
                     for t in trash:
-                        os.remove(os.path.join(f"./data/{wanna_use}", f))
+                        (data_root / t).unlink()
                     print(f"Deduplicating finished with {len(self.sequences)} games left")
                     self.val = self.sequences[20000000:]
                     self.sequences = self.sequences[:20000000]
                     print(f"Using 20 million for training, {len(self.val)} for validation")
-        else:
+        elif "championship" in data_root:
             for fn in os.listdir(data_root):
                 if criteria(fn):
                     with open(os.path.join(data_root, fn), "r") as f:
@@ -146,6 +147,8 @@ class Othello:
                     print(f"Loaded {num_psd}/{num_ldd} (qualified/total) sequences from {fn}")
                     self.sequences.extend(processed)
                     self.results.extend(res)
+        else:
+            raise ValueError(f"Unknown data root: {data_root}")
         
     def __len__(self, ):
         return len(self.sequences)
